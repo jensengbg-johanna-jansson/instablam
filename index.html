@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Instablam</title>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="manifest" href="manifest.json">
+        <link rel="apple-touch-icon" sizes="180x180" href="images/icons/icon_180x180.png">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+        <script src="https://kit.fontawesome.com/dfc5fca1d3.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="main-container">
+            <header class="header--container">
+                <a href="about.html" class="about--button">?</a>
+                <a href="index.html" class="title"><h1>Instablam</h1></a>
+                <button class="notification--button"><i class="far fa-bell notification--icon"></i></button>
+            </header>
+            <main class="content--container">
+                <div class="video--container">
+                    <table class="camera-grid">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <video src=""></video>
+                </div>
+                <div class="canvas--container">
+                    <canvas id="image-canvas" class="image-canvas" data-caman-hidpi-disabled></canvas>
+                </div>
+
+                <div class="filter--container">
+                    <div class="filter-inputs">
+                        <input type="range" name="bright" id="brightness" class="slider" min="-100" max="100" value="0">  
+                        <input type="range" name="cont" id="contrast" class="slider" min="-10" max="10" value="0">   
+                        <input type="range" name="hue" id="hue" class="slider" min="0" max="100" value="0">   
+                        <input type="range" name="sat" id="saturation" class="slider" min="-100" max="100" value="0">    
+                        <input type="range" name="expo" id="exposure" class="slider" min="-100" max="100" value="0">               
+                    </div>
+                    <div class="filter-list">
+                        <button class="filter--button active-filter" id="brightness-button">
+                            <img class="filter--icon" src="images/brightness.svg" alt="brightness">
+                            <span>Brightness</span>
+                        </button>
+                        <button class="filter--button" id="contrast-button">
+                            <img class="filter--icon" src="images/contrast.svg" alt="contrast">
+                            <span>Contrast</span>
+                        </button>
+                        <button class="filter--button" id="hue-button">
+                            <img class="filter--icon" src="images/hue.svg" alt="hue">
+                            <span>Hue</span>
+                        </button>
+                        <button class="filter--button" id="saturation-button">
+                            <img class="filter--icon" src="images/saturation.svg" alt="saturation">
+                            <span>Saturation</span>
+                        </button>
+                        <button class="filter--button" id="exposure-button">
+                            <img class="filter--icon" src="images/exposure.svg" alt="exposure">
+                            <span>Exposure</span>
+                        </button>
+                    </div>
+                </div>
+            </main>
+            <footer class="footer--container">
+                <button class="primary-button" id="reset--button"><i class="fas fa-undo-alt"></i></button>
+                <button class="open-camera--button" id="open-camera--button"><i class="fas fa-camera"></i></button>
+                <button class="take-photo--button" id="take-photo--button"><span class="button-fill"></span></button>
+                <a id="save-link" download="photo">
+                    <button class="primary-button" id="save--button"><i class="far fa-save"></i></button>
+                </a>
+            </footer>
+        </div>  
+
+        <script src="js/CamanJS-4.1.1/dist/caman.full.min.js"></script>
+        <script src="js/index.js" type="module"></script>
+    </body>
+</html>
