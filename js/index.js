@@ -41,7 +41,7 @@ function createMediaStream(video) {
         };
     })
     .catch(function(err) {
-        console.log('Got error: ')
+        console.log('Got error: ', err);
     });
 }
 
@@ -74,8 +74,6 @@ function cropImage(img){
         imgProperties.x = 0;
         imgProperties.y = cropSize / 2;
     }
-
-    console.log(imgProperties);
     
     return imgProperties;
 }
@@ -96,6 +94,7 @@ function addPhotoToDOM(imgSrc) {
         ctx.scale(-1, 1);
 
         ctx.drawImage(img, cropProp.x, cropProp.y, cropProp.newWidth, cropProp.newHeight, 0, 0, cropProp.container, cropProp.container);
+        filter.resetFilters();
     });
 }
 
@@ -108,7 +107,6 @@ function createPhoto() {
     imageCapture.takePhoto()
     .then( function(blob) {
         const imgURL = URL.createObjectURL(blob);
-        console.log(URL.createObjectURL(blob));
 
         addPhotoToDOM(imgURL);
         closeCamera(track);
@@ -126,13 +124,17 @@ function openCamera() {
     let imgCanvas = document.querySelector('.canvas--container');
     let video = document.querySelector('video');
     let videoContainer = document.querySelector('.video--container');
+    const filterContainer = document.querySelector('.filter--container');
+    const footerButtons = document.querySelectorAll('.primary-button');
 
     imgCanvas.style.display = 'none';
     videoContainer.style.display = 'flex';
     this.style.display = 'none';
     takePhotoButton.style.display = 'flex';
-
-    console.log('Open video');
+    filterContainer.style.visibility = 'hidden';
+    for(let i = 0; i < footerButtons.length; i++) {
+        footerButtons[i].style.visibility = 'hidden';
+    }
 
     createMediaStream(video);
 }

@@ -36,7 +36,7 @@ function setFilter() {
         
         this.brightness(filterValues.brightness);
         this.hue(filterValues.hue);
-        this.contrast(filterValues.contrast);
+        this.contrast(parseInt(filterValues.contrast));
         this.saturation(filterValues.saturation);
         this.exposure(filterValues.exposure);
         this.render();
