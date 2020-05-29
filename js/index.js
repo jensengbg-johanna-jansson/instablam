@@ -1,17 +1,15 @@
-/* List of variables */
+    // List of variables
 const filterArray = ['brightness', 'hue', 'contrast', 'saturation', 'exposure'];
 let mediaStream = {};
+let serviceW;
+const publicKey = 'BDa4UWwW77sOdakipgCnc-WehUillhgk4NCo93zjn5AbjXHkQSFaysAYc6tgLikg6ik8Zx7eMIkDYfN3CicSGHs';
 
     // Buttons
 const openCameraButton = document.querySelector('#open-camera--button');
 const takePhotoButton = document.querySelector('#take-photo--button');
 const resetButton = document.querySelector('#reset--button');
 const saveButton = document.querySelector('#save--button');
-
-openCameraButton.addEventListener("click", openCamera);
-takePhotoButton.addEventListener("click", createPhoto);
-resetButton.addEventListener("click", filter.resetFilters);
-saveButton.addEventListener("click", saveImage);
+const notificationButton = document.querySelector('#notification--button');
 
     // Set eventListener to filter sliders and buttons
 for(let i = 0; i < filterArray.length; i++) {
@@ -104,6 +102,8 @@ function addPhotoToDOM(imgSrc) {
 function createPhoto() {
     const track = mediaStream.getVideoTracks()[0];
     const imageCapture = new ImageCapture(track);
+    const filterContainer = document.querySelector('.filter--container');
+    const footerButtons = document.querySelectorAll('.primary-button');
 
     imageCapture.takePhoto()
     .then( function(blob) {
@@ -112,6 +112,10 @@ function createPhoto() {
 
         addPhotoToDOM(imgURL);
         closeCamera(track);
+        filterContainer.style.visibility = 'visible';
+        for(let i = 0; i < footerButtons.length; i++) {
+            footerButtons[i].style.visibility = 'visible';
+        }
 
     }).catch(function(error) {
         console.log('takePhoto() error: ', error);
@@ -149,15 +153,12 @@ function closeCamera(track) {
 function saveImage() {
     let saveLink = document.querySelector("#save-link");
     let canvas = document.querySelector('#image-canvas');
-    let canvasURL = canvas.toDataURL().replace("image/png", "image/octet-stream");
+    let canvasURL = canvas.toDataURL().replace("image/jpeg", "image/octet-stream");
 
     saveLink.setAttribute("href", canvasURL);
 }
 
-
-
 /* Service Worker registration */
-
 function registerServiceWorker() {
     if('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
@@ -166,5 +167,109 @@ function registerServiceWorker() {
     }
 }
 registerServiceWorker();
+
+
+/* PUSH NOTIFICATIONS */
+const urlB64ToUint8Array = base64String => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.ready.then((sw) => {
+        serviceW = sw;
+    });
+}
+
+const requestNotificationPermission = async () => {
+    const permission = await window.Notification.requestPermission();
+    
+    if(permission !== 'granted') {
+        throw new Error('Permission not granted for Notification');
+    } else {
+        return { permissionGranted: true };
+    }
+}
+
+const saveSubscription = async subscription => {
+    const SERVER_URL = "http://localhost:4000/save-subscription";
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(subscription)
+    });
+    const data = await response.json();
+    console.log(data);
+};
+
+const deleteSubscription = async subscription => {
+    const SERVER_URL = "http://localhost:4000/delete-subscription";
+    const response = await fetch(SERVER_URL, {
+      method: "DELETE"
+    });
+    const data = await response.json();
+    console.log(data);    
+};
+
+function toggleNotificationButton() {
+    let bellIcon = document.querySelector('.notification--icon');
+    
+    if(bellIcon.classList.contains('fa-bell')) {
+        bellIcon.classList.remove('fa-bell');
+        bellIcon.classList.add('fa-bell-slash');    
+    } else if(bellIcon.classList.contains('fa-bell-slash')) {
+        bellIcon.classList.remove('fa-bell-slash');
+        bellIcon.classList.add('fa-bell');
+    }
+}
+
+const toggleSubscription = async () => {
+    const permission =  await requestNotificationPermission();
+    serviceW.pushManager.getSubscription().then(async (subscription) => {
+        if(subscription) {
+            deleteSubscription();
+            subscription.unsubscribe().then(function(successful){
+                console.log('Unsubscribed from subscription');
+                console.log(successful);        
+                toggleNotificationButton();
+            })
+            .catch(function(err){
+                console.log('Error', err);
+            })
+        } else {
+            try {
+                const applicationServerKey = urlB64ToUint8Array(publicKey);
+                const options = { 
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey 
+                };
+                const subscription = await serviceW.pushManager.subscribe(options);
+                saveSubscription(subscription);
+                console.log(subscription);
+        
+                toggleNotificationButton();
+            } catch (err) {
+                console.log('Error', err);
+            }  
+        }  
+    })
+}
+
+
+/* Button calls */
+openCameraButton.addEventListener("click", openCamera);
+takePhotoButton.addEventListener("click", createPhoto);
+resetButton.addEventListener("click", filter.resetFilters);
+saveButton.addEventListener("click", saveImage);
+notificationButton.addEventListener("click", toggleSubscription);
 
 import * as filter from './filters.js';
